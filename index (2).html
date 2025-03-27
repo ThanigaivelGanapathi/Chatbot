@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>WSP ChatBot</title>
+		<title>Thanigai ChatBot</title>
 		<link
 			rel="stylesheet"
 			href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" />
@@ -31,7 +31,7 @@
 	</head>
 	<body>
 		<div class="container">
-			<h2>Free ChatBot</h2>
+			<h2>Thanigai ChatBot</h2>
 			<div class="form-group">
 				<input
 					type="text"
@@ -43,6 +43,21 @@
 			<div id="response"></div>
 		</div>
 		<script>
+			
+			function cleanResponse(response) {
+				// Remove \boxed{ at the beginning and } at the end
+				response = response.replace(/^\\boxed{\n?|}$/g, "").trim();
+				//response = response.replace(/^\\boxed{/, "").replace(/}$/, "").trim();
+
+				// Find and remove the "Question: ..." part
+				let answerIndex = response.indexOf('Answer:');
+				if (answerIndex !== -1) {
+					response = response.substring(answerIndex + 7).trim(); // Skip "Answer:"
+				}
+
+				return response;
+			} 
+			 
 			async function sendMessage() {
 				const input = document.getElementById('userInput').value;
 				const responseDiv = document.getElementById('response');
@@ -57,13 +72,13 @@
 						{
 							method: 'POST',
 							headers: {
-								Authorization: 'Bearer <API Key from Open Router>',
+								Authorization: 'Bearer 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',
 								'HTTP-Referer': 'https://www.sitename.com',
 								'X-Title': 'SiteName',
 								'Content-Type': 'application/json',
 							},
 							body: JSON.stringify({
-								model: 'deepseek/deepseek-r1:free',
+								model: 'deepseek/deepseek-r1-zero:free',
 								messages: [{ role: 'user', content: input }],
 							}),
 						},
@@ -72,11 +87,27 @@
 					console.log(data);
 					const markdownText =
 						data.choices?.[0]?.message?.content || 'No response received.';
-					responseDiv.innerHTML = marked.parse(markdownText);
+					
+						let rawResponse = 	marked.parse(markdownText)
+					//let rawResponse = `\\boxed{\nQuestion: "Do you know anything about THE KCP LTD Chennai?"\nAnswer:\n"The KCP Limited, originally known as Krishna Commercial Products Limited..."}`;
+
+			let cleanedResponse = cleanResponse(rawResponse);
+			console.log(cleanedResponse);
+			responseDiv.innerHTML = cleanedResponse
+			//responseDiv.innerHTML = marked.parse(markdownText);
+			document.getElementById('userInput').innerHTML = "";
+
+
 				} catch (error) {
 					responseDiv.innerHTML = 'Error: ' + error.message;
 				}
 			}
+
+			//https://openrouter.ai/
 		</script>
 	</body>
 </html>
+ 
+
+
+ 
